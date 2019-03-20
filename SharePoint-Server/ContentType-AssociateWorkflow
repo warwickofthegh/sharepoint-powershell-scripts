@@ -3,10 +3,10 @@
 # ContentTypes: a array of content types format - string. e.g. "Austrade Base Document", "Case Document Set"
 # Url: the url of the active site to target e.g. http://intranet.austrade.gov.au
 # CTNotWorkflow: the content types that inherit the workflow that you dont want the RP workflow to be associated with e.g. "Contracts"
-# recordPointUrl: The url of the recordpoint site e.g. http://recordpoint.austrade.gov.au
+# recordPointUrl: The url of the recordpoint site e.g. http://recordpoint.contoso.com
 
 #Example
-# C:\Scripts\RecordPointAssociateWorkflow.ps1 -ContentTypes "Case Document Set", "Personnel Document Set", "Austrade Base Document" -Url "http://intranet.austrade.gov.au/sites/lists" -CTNotWorkflow "Committee Submission" -recordPointUrl "http://recordpoint.austrade.gov.au"
+# C:\Scripts\RecordPointAssociateWorkflow.ps1 -ContentTypes "Case Document Set", "Personnel Document Set", "Austrade Base Document" -Url "http://intranet.contoso.com/sites/lists" -CTNotWorkflow "Committee Submission" -recordPointUrl "http://recordpoint.contoso.com"
 
 param(
 	[Parameter(Mandatory=$true)]
