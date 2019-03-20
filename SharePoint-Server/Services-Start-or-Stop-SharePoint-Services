@@ -1,0 +1,16 @@
+#Add SP PS Module
+Add-PSSnapin Microsoft.SharePoint.PowerShell
+
+#Get Server to action on
+$server = Get-SPServer -Identity svr-sharepointappsserver1
+
+#stop a service
+$service = Get-SPServiceInstance -Server $server | where-object {$_.TypeName -eq "Microsoft SharePoint Foundation Web Application"}
+Stop-SPServiceInstance $service
+
+#start a service
+$service = Get-SPServiceInstance -Server $server | where-object {$_.TypeName -eq "Microsoft SharePoint Foundation Workflow Timer Service"}
+Stop-SPServiceInstance $service
+
+#check service status
+Get-SPServiceInstance -Server $server | where-object {$_.TypeName -eq "Microsoft SharePoint Foundation Web Application"}
