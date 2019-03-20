@@ -1,0 +1,128 @@
+#This Script attaches the recordpoint workflow to content types in a site collection
+#Params
+# ContentTypes: a array of content types format - string. e.g. "Austrade Base Document", "Case Document Set"
+# Url: the url of the active site to target e.g. http://intranet.austrade.gov.au
+# CTNotWorkflow: the content types that inherit the workflow that you dont want the RP workflow to be associated with e.g. "Contracts"
+# recordPointUrl: The url of the recordpoint site e.g. http://recordpoint.austrade.gov.au
+
+#Example
+# C:\Scripts\RecordPointAssociateWorkflow.ps1 -ContentTypes "Case Document Set", "Personnel Document Set", "Austrade Base Document" -Url "http://intranet.austrade.gov.au/sites/lists" -CTNotWorkflow "Committee Submission" -recordPointUrl "http://recordpoint.austrade.gov.au"
+
+param(
+	[Parameter(Mandatory=$true)]
+	$ContentTypes=@(),
+	[Parameter(Mandatory=$true)]
+	$Url = $null,
+	$CTNotWorkflow=@(),
+	[Parameter(Mandatory=$true)]
+	$recordPointUrl
+)
+
+Add-PSSnapin Microsoft.SharePoint.Powershell 
+Import-Module 'C:\Program Files\RecordPoint\RecordPoint.Installer.dll'
+
+#Used to add workflows 
+function AddWorkflowToContentType($Url, $ctName){
+
+	[void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SharePoint')   
+	[void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.Office.Policy')  
+
+	$site = Get-SPSite $Url
+
+	if($site -ne $null)
+	{
+		$web = $site.RootWeb
+		$ct = $web.ContentTypes[$ctName]
+		$ctId = $ct.Id
+
+		#Write-Host  $ctName, $ctId
+
+		if($ctId -ne $null)
+		{
+			$ct.ReadOnly = $false
+			$ct.Update()
+
+			Write-Host  $ctName ' read only Updated'
+
+			Add-RecordPointActiveWorkflowContentType `
+			-AllowManualStart $false `
+			-AssociationName "RecordPoint SubmitStub" `
+			-AutoStartOnAdd $true `
+			-AutoStartOnEdit $true `
+			-HistoryList "WorkflowHistory" `
+			-TaskList "RecordPointTasks" `
+			-WebUrl $url `
+			-WorkflowType "SubmitStub" `
+			-ContentTypeId $ctId `
+			-SiteUrl $recordPointUrl 
+
+			write-Host "Successfully added workflow to ContentType: " $ctName
+		}
+		else 
+		{
+			write-Host "Content Type: " $ctName " Does not exist"
+		}
+	}
+	else 
+		{
+			write-Host "Url: " $Url " Does not exist"
+		}
+}
+
+#Used to remove workflows 
+function RemoveWorkflowFromContentType($Url, $ctName, $associationName){
+
+	[void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SharePoint')   
+	[void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.Office.Policy')  
+
+	$site = Get-SPSite $Url
+
+	if($site -ne $null)
+	{
+		$web = $site.RootWeb
+		$ct = $web.ContentTypes[$ctName]
+		$ctId = $ct.Id
+
+
+		if($ctId -ne $null)
+		{
+
+			$ct.ReadOnly = $false
+			$ct.Update()
+
+			Write-Host  $ctName ' read only Updated'
+			$association = $ct.WorkflowAssociations.GetAssociationByName($associationName, $web.Locale)
+
+			if ($association -ne $null) 
+			{
+				Write-Host “Removing from ” $ct
+				$ct.RemoveWorkflowAssociation($association);
+			}
+			else 
+			{
+				Write-Host $ct "does not exist"
+			}
+		}
+
+		else 
+		{
+			write-Host "Content Type: " $ctName " Does not exist"
+		}
+	}
+	else 
+	{
+		write-Host "Url: " $Url " Does not exist"
+	}
+}
+
+$seperator = ','
+
+foreach ($element in ($contentTypes -Split $seperator))
+	{
+		AddWorkflowToContentType -url $Url -ctName $element
+	}
+
+foreach ($element in ($CTNotWorkflow -Split $seperator))
+	{
+		RemoveWorkflowFromContentType -url $Url -ctName $element -associationName "RecordPoint SubmitStub"
+	}
