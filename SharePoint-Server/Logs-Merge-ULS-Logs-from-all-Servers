@@ -1,0 +1,3 @@
+Add-PSSnapin microsoft.sharepoint.powershell
+
+Merge-SPLogFile -Path "d:\merged-ulslogs.log" -Overwrite -StartTime "19/03/2019 16:29" -EndTime "19/03/2019 16:32"
