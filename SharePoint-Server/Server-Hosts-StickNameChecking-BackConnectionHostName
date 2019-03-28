@@ -40,7 +40,7 @@ $hosts | ForEach-Object {
 New-ItemProperty HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters -Name "DisableStrictNameChecking" -Value "1" -PropertyType dword -ErrorAction SilentlyContinue
 
 #Create backconnectionhostname and add in hosts
-New-ItemProperty HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0 -Name "BackConnectionHostName" -Value $hosts -PropertyType multistring
+New-ItemProperty HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0 -Name "BackConnectionHostNames" -Value $hosts -PropertyType multistring
 
 Write-Host -foregroundcolor Green "REBOOT OF SERVER REQURIED" `n
 
