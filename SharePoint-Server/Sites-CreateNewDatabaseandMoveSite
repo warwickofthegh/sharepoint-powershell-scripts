@@ -1,0 +1,10 @@
+#Creates a new content database and moves the site into it, loops through all sites collections in a web application
+
+$varDBNum = 1
+$databasename = "SP2016_UAT_Content_Intranet_" + $varDBNum
+$varSites = Get-SPSite -WebApplication http://sharepoint.contoso.com -Limit all 
+$varSites | % `
+{ `
+    New-SPContentDatabase -Name $databasename -WebApplication http://sharepoint.contoso.com -DatabaseServer spsqlinstance -MaxSiteCount 1 -WarningSiteCount 0; `
+    Move-SPSite -Identity $_.Url -DestinationDatabase $databasename -Confirm:$false; $varDBNum = $varDBNum + 1; $databasename = "SP2016_UAT_Content_Intranet_" + $varDBNum `
+} 
