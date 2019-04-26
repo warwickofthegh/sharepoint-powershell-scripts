@@ -1,0 +1,11 @@
+#REQUIRES PNP Module
+
+#Config Variables
+$SiteURL = "https://sharepoint.contoso.com"
+$ContentTypeGroup ="DCP Content Types"
+ 
+#Connect to PNP Online
+Connect-PnPOnline -Url $SiteURL -Credentials (Get-Credential)
+ 
+#Get the content type
+Get-PnPContentType | ? {$_.Group -eq "GroupName" } | % { Remove-PnPContentType -Identity $_.Name -Force}
