@@ -1,0 +1,17 @@
+#CSV Files is simple header "SiteColumn" and all site columns names listed on a new line
+
+Add-PSSnapin Microsoft.SharePoint.PowerShell –ErrorAction SilentlyContinue
+#Get the Root Web
+$RootWeb = Get-SPWeb $SiteURL
+
+Import-CSV D:\temp\dcpsitecolumns.txt -Header SiteColumn | Foreach-Object{
+   Write-Host $_.SiteColumn
+
+   #Check if a site column exists already
+   if ($RootWeb.Fields.ContainsField($_.SiteColumn))
+   {
+       #delete site column powershell sharepoint
+       $Rootweb.Fields.Delete($_.SiteColumn)
+       Write-host "Site column has been Deleted Successfully!"
+   }
+}
