@@ -1,0 +1,26 @@
+#EXAMPLE FOR MANAGED METADATA SERVICE
+##  : Stop MM Service in local Farm ##
+
+#query service status and IDs
+$ServiceName = “Managed Metadata Web Service”
+Get-SPServiceInstance -server $env:COMPUTERNAME
+#stop services
+Get-SPServiceInstance -server $env:COMPUTERNAME | where-object {$_.TypeName -eq $ServiceName} | Stop-SPServiceInstance -confirm:$false > $null
+#stop sharepoint time service
+Stop-Service sptimerv4
+
+
+##  : Restore Database ##
+
+    # overwrite in SQL Server MS
+    # Add Farm and App Pool Service Accounts permissions to database
+
+
+##  : Start Services ##
+
+#sharepoint timer service
+Start-Service sptimerv4
+Get-SPServiceInstance -server $env:COMPUTERNAME | where-object {$_.TypeName -eq $ServiceName} | Start-SPServiceInstance -confirm:$false > $null
+#IISReset to clear caches
+iisreset /noforce
+
