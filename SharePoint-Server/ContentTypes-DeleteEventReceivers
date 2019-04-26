@@ -1,0 +1,52 @@
+###
+### Not Complete, mix of various attemps
+###
+
+## Check for PS Snapin - SharePoint
+if ( (Get-PSSnapin -Name Microsoft.SharePoint.Powershell -ErrorAction SilentlyContinue) -eq $null ) {
+    Add-PSSnapin Microsoft.SharePoint.Powershell
+}
+
+$web = Get-SPWeb -Identity http://sharepoint.contoso.com
+
+# List event receivers of a specific content type 
+$ct = $web.ContentTypes["Enquiries File"] 
+$ct.EventReceivers | % { $_.Assembly, $_.Class, $_.Type }
+
+# List event receivers of all content types of the current site, where the class name matches the type reported in the event log 
+$web.ContentTypes | % {$_.EventReceivers} | ? { $_.Class -like ‘*RecordPoint*’ } | % { $_.Assembly, $_.Class, $_.Type, $_.ID } | Out-GridView
+
+# Remove site event receivers, where the class name matches (using wildcards) the type reported in the event log 
+$evenReceiverIds = $web.ContentTypes | % {$_.EventReceivers} | ? { $_.Class -like ‘*RecordPoint*’ } | % { $_.Delete() }
+$evenReceiverIds.Count
+
+$eventreceiver = $web.ContentTypes | % {$_.EventReceivers} | ? { $_.Class -like ‘*RecordPoint*’ } 
+$eventreceiver.Count
+
+$evenReceiverIds | % { 
+  $er = $site.EventReceivers[$_] 
+  Write-Host Deleting  $er.Assembly, $er.Class, $er.Type 
+  #$er.Delete() 
+  #Write-Host Deleted 
+}
+
+###############
+
+$var = Get-SPWeb -Identity http://sharepoint.contoso.com | % {$_.ContentTypes} | % {$_.EventReceivers} | where {$_.Assembly -eq "RecordPoint.Active.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d49476ae5b650bf3"} 
+#{$_.Assembly -eq "RecordPoint.Active.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d49476ae5b650bf3"} 
+#$var
+#$var.Count
+$var | % { $_.Delete() }
+
+
+$site = Get-SPSite "http://sharepoint.contoso.com"
+$web = $site.RootWeb
+$ct = $web.ContentTypes["Enquiries File"]
+$ct.EventReceivers | where {$_.Assembly -eq "RecordPoint.Active.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d49476ae5b650bf3"}
+
+Do 
+{
+    $ct.EventReceivers[0].delete()
+} While ($ct.EventReceivers | where {$_.Assembly -eq "RecordPoint.Active.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d49476ae5b650bf3"})
+
+$ct.update()
