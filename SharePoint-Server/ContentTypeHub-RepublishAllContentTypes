@@ -1,0 +1,32 @@
+Add-PSSnapin microsoft.sharepoint.powershell
+
+$HubSite = Get-SPSite https://sharepoint.contoso.com/sites/contenttypehub
+$Web = $HubSite.RootWeb
+
+#Check the site is a content type hub
+if ([Microsoft.SharePoint.Taxonomy.ContentTypeSync.ContentTypePublisher]::IsContentTypeSharingEnabled($HubSite))
+{
+    #Set up ContentTypePublisher object to allow publishing through the Content Type Hub site
+    $CTPublish = New-Object Microsoft.SharePoint.Taxonomy.ContentTypeSync.ContentTypePublisher($HubSite)
+
+    #Step through each content type in the content type hub
+    $Web.ContentTypes | Sort-Object Name | ForEach-Object {
+
+        if ($CTPublish.IsPublished($_))
+        {
+            $CTPublish.Publish($_)
+            write-host “Content type” $_.Name “has been republished” -foregroundcolor Green
+        }
+        else
+        {
+            write-host “Content type” $_.Name “is not a published content type”
+        }
+    }
+}
+else
+{
+    write-host $HubURL “is not a content type hub site”
+}
+
+$Web.Dispose()
+$HubSite.Dispose()
